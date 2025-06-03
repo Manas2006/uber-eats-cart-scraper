@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, HttpUrl
-from uber_scraper import UberEatsScraper, CartData
 import logging
+from .models import CartItem, CartData
+from .uber_scraper_async import UberEatsAsyncScraper
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,17 +21,11 @@ class CartUrl(BaseModel):
 async def scrape_cart(cart_url: CartUrl):
     """
     Scrape an Uber Eats cart from the provided URL.
-    
-    Args:
-        cart_url (CartUrl): The shareable Uber Eats cart URL
-        
-    Returns:
-        CartData: The scraped cart data
     """
     try:
-        with UberEatsScraper() as scraper:
-            cart_data = scraper.scrape_cart(str(cart_url.url))
-            return cart_data
+        scraper = UberEatsAsyncScraper()
+        cart_data = await scraper.scrape_cart(str(cart_url.url))
+        return cart_data
     except Exception as e:
         logger.error(f"Error scraping cart: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

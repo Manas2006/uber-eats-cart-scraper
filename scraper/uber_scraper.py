@@ -2,12 +2,12 @@ from playwright.sync_api import sync_playwright
 from typing import List, Dict, Optional
 import json
 from dotenv import load_dotenv
-from pydantic import BaseModel
 import logging
 import time
 import random
 import re
 from bs4 import BeautifulSoup
+from .models import CartItem, CartData  # <-- import models
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,18 +17,6 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 CART_URL = "https://eats.uber.com/group-orders/925d1d17-c833-4c96-915c-831e3027e67d/join"
-
-class CartItem(BaseModel):
-    name: str
-    quantity: int
-    price: float
-    description: Optional[str] = None
-    person: Optional[str] = None
-
-class CartData(BaseModel):
-    restaurant: str
-    items: List[CartItem]
-    total_price: float
 
 class UberEatsScraper:
     def __init__(self):

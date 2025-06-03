@@ -1,18 +1,19 @@
 import requests
 import json
-from uber_scraper import UberEatsScraper
+import asyncio
+from uber_scraper_async import UberEatsAsyncScraper
 
-def test_scraper_direct():
+async def test_scraper_direct():
     """
     Test the scraper directly without the API.
     """
     cart_url = "https://eats.uber.com/group-orders/05fb718f-5c17-4c9c-817e-ffd5f9f04c07/join"
     
     try:
-        with UberEatsScraper() as scraper:
-            cart_data = scraper.scrape_cart(cart_url)
-            print("Direct scraper test successful!")
-            print(json.dumps(cart_data.dict(), indent=2))
+        scraper = UberEatsAsyncScraper()
+        cart_data = await scraper.scrape_cart(cart_url)
+        print("Direct scraper test successful!")
+        print(json.dumps(cart_data.dict(), indent=2))
     except Exception as e:
         print(f"Error in direct scraper test: {str(e)}")
 
@@ -35,7 +36,7 @@ def test_scraper_api():
 
 if __name__ == "__main__":
     print("Testing direct scraper...")
-    test_scraper_direct()
+    asyncio.run(test_scraper_direct())
     
     print("\nTesting API...")
     test_scraper_api() 
