@@ -1,31 +1,39 @@
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
+*$py.class
 *.so
-*.egg
-*.egg-info/
-dist/
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
 .eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Virtual environments
-.venv/
+# Virtual Environment
+.env
+.venv
+env/
 venv/
-scraper/venv/
+ENV/
 scraper/.venv/
 
-# Playwright browser binaries and cache
-playwright/.cache/
-playwright/.browsers/
-
-# VSCode
+# IDE
+.idea/
 .vscode/
+*.swp
+*.swo
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Debug/Output
-scraper/debug_view_order_page.html 
+# Project specific
+scraped_items.json
+debug_*.html 

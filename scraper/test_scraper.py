@@ -6,7 +6,7 @@ def test_scraper_direct():
     """
     Test the scraper directly without the API.
     """
-    cart_url = "https://eats.uber.com/group-orders/7938685b-f05c-419c-a8aa-6e03fc41f840/join"
+    cart_url = "https://eats.uber.com/group-orders/05fb718f-5c17-4c9c-817e-ffd5f9f04c07/join"
     
     try:
         with UberEatsScraper() as scraper:
@@ -20,7 +20,7 @@ def test_scraper_api():
     """
     Test the scraper through the API.
     """
-    cart_url = "https://eats.uber.com/group-orders/7938685b-f05c-419c-a8aa-6e03fc41f840/join"
+    cart_url = "https://eats.uber.com/group-orders/05fb718f-5c17-4c9c-817e-ffd5f9f04c07/join"
     
     try:
         response = requests.post(

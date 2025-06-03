@@ -1,13 +1,13 @@
 from playwright.sync_api import sync_playwright
 from typing import List, Dict, Optional
 import json
-import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import logging
 import time
 import random
 import re
+from bs4 import BeautifulSoup
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
+
+CART_URL = "https://eats.uber.com/group-orders/925d1d17-c833-4c96-915c-831e3027e67d/join"
 
 class CartItem(BaseModel):
     name: str
@@ -77,37 +79,32 @@ class UberEatsScraper:
     def _scrape_group_order(self) -> List[CartItem]:
         items = []
         try:
-            # Save the page content for debugging
-            with open("debug_group_order_page.html", "w", encoding="utf-8") as f:
-                f.write(self.page.content())
-            logger.info("Saved group order page HTML to debug_group_order_page.html")
-
             # Wait for the 'Others in your group' header
             self.page.wait_for_selector('h6:has-text("Others in your group")', timeout=15000)
-            logger.info("Found 'Others in your group' header")
             others_header = self.page.locator('h6:has-text("Others in your group")').first
             # Wait for all participant lis to be present
             self.page.wait_for_selector('li.al.aq.fa', timeout=10000)
             participant_lis = self.page.locator('li.al.aq.fa').all()
             if len(participant_lis) > 1:
                 target_li = participant_lis[1]  # Second participant
-                # Dump the HTML of the second participant li for debugging
-                try:
-                    html = target_li.inner_html()
-                    with open("debug_second_participant_li.html", "w", encoding="utf-8") as f:
-                        f.write(html)
-                    logger.info("Dumped HTML of second participant li to debug_second_participant_li.html")
-                except Exception as e:
-                    logger.error(f"Failed to dump HTML of second participant li: {str(e)}")
                 dropdown_button = target_li.locator('button.bh.al.ci.dq').first
                 if dropdown_button:
                     try:
                         dropdown_button.wait_for(state="visible", timeout=5000)
                         dropdown_button.scroll_into_view_if_needed()
-                        self.page.wait_for_timeout(500)
+                        self.page.wait_for_timeout(1000)
                         dropdown_button.click()
-                        logger.info("Clicked dropdown button for second participant.")
-                        self.page.wait_for_selector('div.bo.bp.co.dy.b1, div.cy.bo.bp.bq.br.jf', timeout=10000)
+                        # More robust wait for items to appear
+                        max_retries = 5
+                        for attempt in range(max_retries):
+                            try:
+                                self.page.wait_for_selector('div.bo.bp.co.dy.b1, div.cy.bo.bp.bq.br.jf', timeout=4000)
+                                self.page.wait_for_timeout(1000)  # Give extra time for rendering
+                                break
+                            except Exception:
+                                if attempt == max_retries - 1:
+                                    raise
+                                self.page.wait_for_timeout(1000)  # Wait and retry
                         # Dump the HTML of the expanded second participant li for debugging
                         try:
                             html = target_li.inner_html()
@@ -116,49 +113,30 @@ class UberEatsScraper:
                             logger.info("Dumped HTML of expanded second participant li to debug_second_participant_li_expanded.html")
                         except Exception as e:
                             logger.error(f"Failed to dump HTML of expanded second participant li: {str(e)}")
-                        # Scrape items for the expanded second participant
-                        item_links = target_li.locator('a.al.en.aq.kn.or').all()
-                        logger.info(f"Found {len(item_links)} item links in expanded participant.")
-                        for item_link in item_links:
-                            try:
-                                name_elem = item_link.locator('div.bo.bp.co.dy.b1').first
-                                item_name = name_elem.inner_text().strip() if name_elem else None
-                                price_elem = item_link.locator('div.cy.bo.bp.bq.br.jf').first
-                                price = 0.0
-                                if price_elem:
-                                    price_text = price_elem.inner_text().strip()
-                                    if price_text and '$' in price_text:
-                                        price = float(price_text.replace('$', '').strip())
-                                if item_name:
+                        # Scrape items for the expanded second participant using in-memory HTML parsing
+                        html = target_li.inner_html()
+                        soup = BeautifulSoup(html, "html.parser")
+                        for a in soup.find_all("a"):
+                            name_div = a.find("div", class_="bo bp co dy b1")
+                            price_div = a.find("div", class_=lambda c: c and c.startswith("cy bo bp bq br"))
+                            if name_div and price_div:
+                                item_name = name_div.get_text(strip=True)
+                                price_text = price_div.get_text()
+                                match = re.search(r"\$([0-9]+(?:\.[0-9]{2})?)", price_text)
+                                if match:
+                                    price = float(match.group(1))
                                     items.append(CartItem(
                                         name=item_name,
                                         quantity=1,
                                         price=price,
-                                        person="Manas"  # or extract dynamically if needed
+                                        person="Manas"
                                     ))
-                                    logger.info(f"Added item: {item_name} (${price}) for Manas")
-                            except Exception as e:
-                                logger.error(f"Error scraping item link: {str(e)}")
-                                continue
                     except Exception as e:
                         logger.error(f"Failed to click dropdown button: {str(e)}")
                 else:
                     logger.error("Could not find dropdown button in second participant li.")
             else:
                 logger.error("Could not find second participant li.al.aq.fa.")
-
-            # Dump the outer HTML of several siblings after the header for debugging
-            siblings_html = []
-            for i in range(1, 6):
-                try:
-                    sibling = others_header.evaluate_handle(f'el => el.parentElement.children[Array.prototype.indexOf.call(el.parentElement.children, el) + {i}]')
-                    html = self.page.evaluate('(el) => el ? el.outerHTML : ""', sibling)
-                    siblings_html.append(html)
-                except Exception:
-                    continue
-            with open("debug_others_siblings.html", "w", encoding="utf-8") as f:
-                f.write("\n\n".join(siblings_html))
-            logger.info("Dumped siblings after 'Others in your group' header to debug_others_siblings.html")
         except Exception as e:
             logger.error(f"Error scraping group order: {str(e)}")
         return items
@@ -188,13 +166,16 @@ class UberEatsScraper:
             raise
 
 def main():
-    cart_url = "https://eats.uber.com/group-orders/05fb718f-5c17-4c9c-817e-ffd5f9f04c07/join"
     try:
         with UberEatsScraper() as scraper:
-            cart_data = scraper.scrape_cart(cart_url)
-            print(json.dumps(cart_data.dict(), indent=2))
+            cart_data = scraper.scrape_cart(CART_URL)
+            # Output JSON file with names and prices
+            output = [{"name": item.name, "price": item.price} for item in cart_data.items]
+            with open("scraped_items.json", "w", encoding="utf-8") as f:
+                json.dump(output, f, indent=2)
+            print(json.dumps(output, indent=2))
     except Exception as e:
-        logger.error(f"Error in main: {str(e)}")
+        print(f"Error in main: {str(e)}")
 
 if __name__ == "__main__":
     main() 
