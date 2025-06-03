@@ -1,96 +1,98 @@
-# 🍽️ OrderSmarter
+# 🍽️ Uber Eats Cart Scraper
 
-A smart Uber Eats cart analyzer that helps you make healthier and more cost-effective food choices.
+A smart Uber Eats group cart scraper that extracts restaurant and item data from a shared Uber Eats group order link.
 
 ## 🌟 Features
 
-- 🔗 Paste any Uber Eats cart link
-- 📊 Get detailed nutritional analysis
-- 💰 Find cheaper alternatives
-- 🥗 Discover healthier options
-- 📈 Track your spending and calories
+- 🔗 Paste any Uber Eats group cart link
+- 📦 Get restaurant and item details as JSON
+- 🖥️ REST API endpoint (FastAPI, async)
+- 🐍 CLI/testing support (sync)
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React + Tailwind CSS
-- **Backend**: Spring Boot
-- **Scraper**: Python + Playwright
-- **ML Model**: FastAPI (hosted separately)
+- **Backend/API**: FastAPI (Python, async)
+- **Scraper**: Playwright (Python, async & sync)
+- **Data Models**: Pydantic
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Python 3.8+
-- Java 17+
-- Node.js 16+
 - Playwright for Python
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/uber-eats-cart-scraper.git
+git clone https://github.com/Manas2006/uber-eats-cart-scraper.git
 cd uber-eats-cart-scraper
 ```
 
-2. Set up the Python scraper:
+2. Set up the Python environment and install dependencies:
 ```bash
-cd scraper
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 playwright install
 ```
 
-3. Set up the Spring Boot backend:
-```bash
-cd backend
-./gradlew build
-```
+### Running the Scraper (CLI)
 
-4. Set up the React frontend:
-```bash
-cd frontend
-npm install
-```
-
-### Running the Application
-
-1. Start the Python scraper:
+To run the scraper directly (sync, for testing):
 ```bash
 cd scraper
 python uber_scraper.py
 ```
 
-2. Start the Spring Boot backend:
+### Running the API (Async, Recommended)
+
+From the project root, start the FastAPI server:
 ```bash
-cd backend
-./gradlew bootRun
+python -m scraper.api
 ```
 
-3. Start the React frontend:
+The API will be available at: `http://localhost:8000`
+
+#### Test the API Endpoint
+
+Send a POST request to `/scrape` with your Uber Eats group order link:
 ```bash
-cd frontend
-npm run dev
+curl -X POST http://localhost:8000/scrape \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://eats.uber.com/group-orders/YOUR-GROUP-ID/join"}'
+```
+
+#### Example Response
+```json
+{
+  "restaurant": "Wayback Burgers (18321 West Airport Blvd)",
+  "items": [
+    {"name": "DOUBLE CHEESEBURGER BOX", "quantity": 1, "price": 12.69, "person": "Manas"},
+    {"name": "REGULAR MILKSHAKE", "quantity": 1, "price": 6.89, "person": "Manas"}
+  ],
+  "total_price": 19.58
+}
 ```
 
 ## 📁 Project Structure
 
 ```
-order-smarter/
-├── scraper/              # Python scraper using Playwright
-├── backend/             # Spring Boot backend
-├── frontend/            # React frontend
-└── README.md
+uber-eats-cart-scraper/
+└── scraper/
+    ├── api.py                # FastAPI app (async API)
+    ├── uber_scraper_async.py # Async Playwright scraper (used by API)
+    ├── uber_scraper.py       # Sync Playwright scraper (CLI/testing)
+    ├── models.py             # Pydantic models
+    ├── test_scraper.py       # Test script for direct/API scraping
+    └── requirements.txt      # Python dependencies
 ```
 
 ## 🔧 Configuration
 
-The application requires the following environment variables:
-
-- `CALORIE_API_URL`: URL of the calorie prediction API
-- `UBER_EATS_API_KEY`: (if required) Your Uber Eats API key
+- No special environment variables are required for basic scraping.
+- If you use `.env` for Playwright or other secrets, place it in the `scraper/` directory.
 
 ## 🤝 Contributing
 
@@ -108,5 +110,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Uber Eats](https://www.ubereats.com/) for the inspiration
 - [Playwright](https://playwright.dev/) for the web scraping capabilities
-- [Spring Boot](https://spring.io/projects/spring-boot) for the backend framework
-- [React](https://reactjs.org/) for the frontend framework 
+- [FastAPI](https://fastapi.tiangolo.com/) for the API framework 
