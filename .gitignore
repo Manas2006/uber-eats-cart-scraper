@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+scraper/venv/
+scraper/.venv/
+
+# Playwright browser binaries and cache
+playwright/.cache/
+playwright/.browsers/
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug/Output
+scraper/debug_view_order_page.html 
