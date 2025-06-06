@@ -7,9 +7,8 @@ RUN apt-get update && \
     libenchant-2-2 \
     libsecret-1-0 \
     libmanette-0.2-0 \
-    libgstgl1.0-0 \
-    libgstcodecparsers-1.0-0 \
     libgles2 \
+    gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
     && rm -rf /var/lib/apt/lists/*
 
 # Set workdir
