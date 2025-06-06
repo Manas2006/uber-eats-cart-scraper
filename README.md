@@ -7,13 +7,14 @@ A smart Uber Eats group cart scraper that extracts restaurant and item data from
 - 🔗 Paste any Uber Eats group cart link
 - 📦 Get restaurant and item details as JSON
 - 🖥️ REST API endpoint (FastAPI, async)
-- 🐍 CLI/testing support (sync)
+- 🚀 Deployed on Render (free tier)
 
 ## 🛠️ Tech Stack
 
 - **Backend/API**: FastAPI (Python, async)
-- **Scraper**: Playwright (Python, async & sync)
+- **Scraper**: Playwright (Python, async)
 - **Data Models**: Pydantic
+- **Hosting**: Render
 
 ## 🚀 Getting Started
 
@@ -38,15 +39,7 @@ pip install -r requirements.txt
 playwright install
 ```
 
-### Running the Scraper (CLI)
-
-To run the scraper directly (sync, for testing):
-```bash
-cd scraper
-python uber_scraper.py
-```
-
-### Running the API (Async, Recommended)
+### Running the API Locally
 
 From the project root, start the FastAPI server:
 ```bash
@@ -67,12 +60,11 @@ curl -X POST http://localhost:8000/scrape \
 #### Example Response
 ```json
 {
-  "restaurant": "Wayback Burgers (18321 West Airport Blvd)",
+  "restaurant": "Restaurant Name",
   "items": [
-    {"name": "DOUBLE CHEESEBURGER BOX", "quantity": 1, "price": 12.69, "person": "Manas"},
-    {"name": "REGULAR MILKSHAKE", "quantity": 1, "price": 6.89, "person": "Manas"}
+    {"name": "Item Name", "quantity": 1, "price": 12.99, "person": "Person Name"}
   ],
-  "total_price": 19.58
+  "total_price": 12.99
 }
 ```
 
@@ -80,27 +72,25 @@ curl -X POST http://localhost:8000/scrape \
 
 ```
 uber-eats-cart-scraper/
-└── scraper/
-    ├── api.py                # FastAPI app (async API)
-    ├── uber_scraper_async.py # Async Playwright scraper (used by API)
-    ├── uber_scraper.py       # Sync Playwright scraper (CLI/testing)
-    ├── models.py             # Pydantic models
-    ├── test_scraper.py       # Test script for direct/API scraping
-    └── requirements.txt      # Python dependencies
+├── scraper/
+│   ├── api.py                # FastAPI app (async API)
+│   ├── uber_scraper_async.py # Async Playwright scraper
+│   └── models.py             # Pydantic models
+├── requirements.txt          # Python dependencies
+├── render.yaml              # Render deployment config
+└── README.md               # Project documentation
 ```
 
-## 🔧 Configuration
+## 🚀 Deployment
 
-- No special environment variables are required for basic scraping.
-- If you use `.env` for Playwright or other secrets, place it in the `scraper/` directory.
+This project is configured for easy deployment on Render:
 
-## 🤝 Contributing
+1. Fork this repository
+2. Create a free account on [Render](https://render.com)
+3. Create a new Web Service and connect your repository
+4. Render will automatically detect the configuration from `render.yaml`
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+The API will be available at: `https://your-app-name.onrender.com`
 
 ## 📝 License
 
@@ -110,4 +100,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Uber Eats](https://www.ubereats.com/) for the inspiration
 - [Playwright](https://playwright.dev/) for the web scraping capabilities
-- [FastAPI](https://fastapi.tiangolo.com/) for the API framework 
+- [FastAPI](https://fastapi.tiangolo.com/) for the API framework
+- [Render](https://render.com) for the hosting platform 
