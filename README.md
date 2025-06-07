@@ -81,16 +81,6 @@ uber-eats-cart-scraper/
 └── README.md               # Project documentation
 ```
 
-## 🚀 Deployment
-
-This project is configured for easy deployment on Render:
-
-1. Fork this repository
-2. Create a free account on [Render](https://render.com)
-3. Create a new Web Service and connect your repository
-4. Render will automatically detect the configuration from `render.yaml`
-
-The API will be available at: `https://your-app-name.onrender.com`
 
 ## 📝 License
 
